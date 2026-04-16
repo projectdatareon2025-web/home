@@ -1,8 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const INPUT = "./tokens.json";
-const OUTPUT = "./clean-tokens.json";
+// пути относительно корня репозитория
+const INPUT = path.resolve(__dirname, "../../tokens/tokens.json");
+const OUTPUT = path.resolve(__dirname, "../../clean-tokens.json");
 
 // рекурсивная очистка
 function clean(obj) {
@@ -14,7 +15,7 @@ function clean(obj) {
     const newObj = {};
 
     for (const key in obj) {
-      // ❌ удаляем всё лишнее
+      // ❌ удаляем фигмовские артефакты
       if (
         key === "$extensions" ||
         key.startsWith("com.figma")
@@ -31,12 +32,13 @@ function clean(obj) {
   return obj;
 }
 
-const raw = JSON.parse(fs.readFileSync(INPUT, "utf8"));
-const cleaned = clean(raw);
+try {
+  const raw = JSON.parse(fs.readFileSync(INPUT, "utf8"));
+  const cleaned = clean(raw);
 
-fs.writeFileSync(OUTPUT, JSON.stringify(cleaned, null, 2));
-console.log("✅ Tokens cleaned");
-// 👉 перезаписываем тот же файл
-fs.writeFileSync(FILE, JSON.stringify(cleaned, null, 2));
-
-console.log("✅ Tokens cleaned");
+  fs.writeFileSync(OUTPUT, JSON.stringify(cleaned, null, 2));
+  console.log("✅ Tokens cleaned → clean-tokens.json");
+} catch (error) {
+  console.error("❌ Error cleaning tokens:", error);
+  process.exit(1);
+}
