@@ -1,1 +1,32 @@
+const fs = require("fs");
 
+const FILE = "./tokens.json";
+
+function clean(obj) {
+  if (Array.isArray(obj)) return obj.map(clean);
+
+  if (obj && typeof obj === "object") {
+    const newObj = {};
+
+    for (const key in obj) {
+      if (
+        key === "$extensions" ||
+        key.startsWith("com.figma")
+      ) continue;
+
+      newObj[key] = clean(obj[key]);
+    }
+
+    return newObj;
+  }
+
+  return obj;
+}
+
+const data = JSON.parse(fs.readFileSync(FILE, "utf8"));
+const cleaned = clean(data);
+
+// 👉 перезаписываем тот же файл
+fs.writeFileSync(FILE, JSON.stringify(cleaned, null, 2));
+
+console.log("✅ Tokens cleaned");
