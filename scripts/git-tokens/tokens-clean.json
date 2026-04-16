@@ -1,18 +1,26 @@
 const fs = require("fs");
+const path = require("path");
 
-const FILE = "./tokens.json";
+const INPUT = "./tokens.json";
+const OUTPUT = "./clean-tokens.json";
 
+// рекурсивная очистка
 function clean(obj) {
-  if (Array.isArray(obj)) return obj.map(clean);
+  if (Array.isArray(obj)) {
+    return obj.map(clean);
+  }
 
   if (obj && typeof obj === "object") {
     const newObj = {};
 
     for (const key in obj) {
+      // ❌ удаляем всё лишнее
       if (
         key === "$extensions" ||
         key.startsWith("com.figma")
-      ) continue;
+      ) {
+        continue;
+      }
 
       newObj[key] = clean(obj[key]);
     }
@@ -23,9 +31,11 @@ function clean(obj) {
   return obj;
 }
 
-const data = JSON.parse(fs.readFileSync(FILE, "utf8"));
-const cleaned = clean(data);
+const raw = JSON.parse(fs.readFileSync(INPUT, "utf8"));
+const cleaned = clean(raw);
 
+fs.writeFileSync(OUTPUT, JSON.stringify(cleaned, null, 2));
+console.log("✅ Tokens cleaned");
 // 👉 перезаписываем тот же файл
 fs.writeFileSync(FILE, JSON.stringify(cleaned, null, 2));
 
